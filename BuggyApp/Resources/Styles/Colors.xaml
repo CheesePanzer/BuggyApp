@@ -5,18 +5,38 @@
 
     <!-- Note: For Android please see also Platforms\Android\Resources\values\colors.xml -->
 
-    <Color x:Key="Primary">#512BD4</Color>
-    <Color x:Key="PrimaryDark">#ac99ea</Color>
-    <Color x:Key="PrimaryDarkText">#242424</Color>
-    <Color x:Key="Secondary">#DFD8F7</Color>
-    <Color x:Key="SecondaryDarkText">#9880e5</Color>
-    <Color x:Key="Tertiary">#2B0B98</Color>
+    <!-- Ocean palette -->
+    <Color x:Key="Primary">#087E8B</Color>
+    <Color x:Key="PrimaryDark">#59C3C3</Color>
+    <Color x:Key="PrimaryDarkText">#062B35</Color>
+    <Color x:Key="Secondary">#BDEFF2</Color>
+    <Color x:Key="SecondaryDarkText">#8EDDE3</Color>
+    <Color x:Key="Tertiary">#0B4F6C</Color>
+
+    <Color x:Key="OceanBackground">#F2FAFC</Color>
+    <Color x:Key="OceanSurface">#FFFFFF</Color>
+    <Color x:Key="OceanNavy">#073B4C</Color>
+    <Color x:Key="OceanBlue">#087E8B</Color>
+    <Color x:Key="OceanMint">#59C3C3</Color>
+    <Color x:Key="OceanAccent">#49B6FF</Color>
+    <Color x:Key="OceanAccentSoft">#DDF3FF</Color>
+    <Color x:Key="OceanSuccessSoft">#DDF7F4</Color>
+    <Color x:Key="OceanSuccessDark">#087568</Color>
+    <Color x:Key="OceanText">#073B4C</Color>
+    <Color x:Key="OceanTextSecondary">#365F6B</Color>
+    <Color x:Key="OceanTextMuted">#66838C</Color>
+    <Color x:Key="OceanMutedOnDark">#B9DCE2</Color>
+    <Color x:Key="OceanBorder">#B9DDE3</Color>
+    <Color x:Key="OceanDivider">#D7EBEF</Color>
+    <Color x:Key="OceanDanger">#D85B5B</Color>
+    <Color x:Key="OceanDangerDark">#A93636</Color>
+    <Color x:Key="OceanOnPrimary">#FFFFFF</Color>
 
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>
-    <Color x:Key="Magenta">#D600AA</Color>
-    <Color x:Key="MidnightBlue">#190649</Color>
-    <Color x:Key="OffBlack">#1f1f1f</Color>
+    <Color x:Key="Magenta">#49B6FF</Color>
+    <Color x:Key="MidnightBlue">#073B4C</Color>
+    <Color x:Key="OffBlack">#061F29</Color>
 
     <Color x:Key="Gray100">#E1E1E1</Color>
     <Color x:Key="Gray200">#C8C8C8</Color>

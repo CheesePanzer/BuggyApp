@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="BuggyApp.Pages.CatalogPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:BuggyApp.ViewModels"
+    x:DataType="vm:CatalogViewModel"
+    Title="Catalog"
+    Style="{StaticResource OceanPage}">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+        <Grid Padding="20,18" ColumnDefinitions="*,Auto" Style="{StaticResource OceanHeader}">
+            <VerticalStackLayout>
+                <Label FontAttributes="Bold" FontSize="26" Style="{StaticResource OceanHeaderTitle}" Text="Course catalog" />
+                <Label Style="{StaticResource OceanHeaderText}" Text="300 local courses · paged in groups of 30" />
+            </VerticalStackLayout>
+            <Button Grid.Column="1" Command="{Binding RefreshCommand}" Text="Refresh" VerticalOptions="Center" />
+        </Grid>
+
+        <ScrollView Grid.Row="1" Orientation="Horizontal">
+            <HorizontalStackLayout Padding="14,12" Spacing="8">
+                <Button Command="{Binding SelectCategoryCommand}" CommandParameter="All" Text="All" />
+                <Button Command="{Binding SelectCategoryCommand}" CommandParameter="Computing" Text="Computing" />
+                <Button Command="{Binding SelectCategoryCommand}" CommandParameter="Business" Text="Business" />
+                <Button Command="{Binding SelectCategoryCommand}" CommandParameter="Engineering" Text="Engineering" />
+                <Button Command="{Binding SelectCategoryCommand}" CommandParameter="Science" Text="Science" />
+                <Button Command="{Binding SelectCategoryCommand}" CommandParameter="Arts" Text="Arts" />
+                <Button Command="{Binding SelectCategoryCommand}" CommandParameter="Humanities" Text="Humanities" />
+            </HorizontalStackLayout>
+        </ScrollView>
+
+        <RefreshView Grid.Row="2" Command="{Binding RefreshCommand}" IsRefreshing="{Binding IsRefreshing}">
+            <CollectionView
+                ItemsSource="{Binding Courses}"
+                RemainingItemsThreshold="5"
+                RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}"
+                SelectionMode="None">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="30" Spacing="10">
+                        <Label FontAttributes="Bold" FontSize="20" HorizontalTextAlignment="Center" Text="No courses loaded" />
+                        <Label HorizontalTextAlignment="Center" Text="Pull to refresh the catalog." TextColor="{StaticResource OceanTextMuted}" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:CourseItemViewModel">
+                        <Border Margin="14,6" Padding="16" BackgroundColor="{StaticResource OceanSurface}" Stroke="{StaticResource OceanBorder}" StrokeShape="RoundRectangle 16">
+                            <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="8">
+                                <VerticalStackLayout>
+                                    <Label FontAttributes="Bold" FontSize="12" Text="{Binding Code}" TextColor="{StaticResource OceanBlue}" />
+                                    <Label FontAttributes="Bold" FontSize="18" LineBreakMode="TailTruncation" Text="{Binding Title}" TextColor="{StaticResource OceanText}" />
+                                </VerticalStackLayout>
+                                <Border Grid.Column="1" Padding="9,5" BackgroundColor="{StaticResource OceanSuccessSoft}" StrokeThickness="0" StrokeShape="RoundRectangle 12">
+                                    <Label FontSize="11" Text="{Binding StatusText}" TextColor="{StaticResource OceanSuccessDark}" />
+                                </Border>
+                                <Label Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Instructor, StringFormat='Instructor: {0}'}" TextColor="{StaticResource OceanTextMuted}" />
+                                <Grid Grid.Row="2" Grid.ColumnSpan="2" ColumnDefinitions="*,*" ColumnSpacing="10">
+                                    <Button Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CatalogViewModel}}, Path=OpenDetailsCommand}" CommandParameter="{Binding .}" Text="Details" />
+                                    <Button Grid.Column="1" BackgroundColor="{StaticResource OceanAccent}" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CatalogViewModel}}, Path=ToggleBasketCommand}" CommandParameter="{Binding .}" IsEnabled="{Binding IsUpdating, Converter={StaticResource InvertedBoolConverter}}" Text="{Binding ActionText}" TextColor="{StaticResource OceanNavy}" />
+                                </Grid>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+
+        <Grid Grid.Row="3" Padding="14,8" BackgroundColor="{StaticResource OceanBackground}">
+            <ActivityIndicator IsRunning="{Binding IsLoadingMore}" IsVisible="{Binding IsLoadingMore}" />
+            <Label HorizontalTextAlignment="Center" IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotNullOrEmptyConverter}}" Text="{Binding ErrorMessage}" TextColor="{StaticResource OceanDangerDark}" />
+        </Grid>
+    </Grid>
+</ContentPage>

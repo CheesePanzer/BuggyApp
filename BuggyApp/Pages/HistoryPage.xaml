@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="BuggyApp.Pages.HistoryPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:BuggyApp.ViewModels"
+    x:DataType="vm:HistoryViewModel"
+    Title="History"
+    Style="{StaticResource OceanPage}">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Grid Padding="20,18" ColumnDefinitions="*,Auto" Style="{StaticResource OceanHeader}">
+            <VerticalStackLayout>
+                <Label FontAttributes="Bold" FontSize="26" Style="{StaticResource OceanHeaderTitle}" Text="Registration history" />
+                <Label Style="{StaticResource OceanHeaderText}" Text="{Binding RegistrationCount, StringFormat='{0} records'}" />
+            </VerticalStackLayout>
+            <Button Grid.Column="1" Command="{Binding RefreshCommand}" Text="Refresh" VerticalOptions="Center" />
+        </Grid>
+
+        <RefreshView Grid.Row="1" Command="{Binding RefreshCommand}" IsRefreshing="{Binding IsRefreshing}">
+            <CollectionView
+                ItemsSource="{Binding Registrations}"
+                RemainingItemsThreshold="4"
+                RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}"
+                SelectionMode="None">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="30" Spacing="10" VerticalOptions="Center">
+                        <Label FontAttributes="Bold" FontSize="23" HorizontalTextAlignment="Center" Text="No registration records" TextColor="{StaticResource OceanText}" />
+                        <Label HorizontalTextAlignment="Center" Text="Complete a registration from the basket to create one." TextColor="{StaticResource OceanTextMuted}" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:RegistrationItemViewModel">
+                        <Border Margin="14,6" Padding="16" BackgroundColor="{StaticResource OceanSurface}" Stroke="{StaticResource OceanBorder}" StrokeShape="RoundRectangle 16">
+                            <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="8">
+                                <VerticalStackLayout>
+                                    <Label FontAttributes="Bold" FontSize="12" Text="REGISTRATION" TextColor="{StaticResource OceanTextMuted}" />
+                                    <Label FontAttributes="Bold" FontSize="21" Text="{Binding ShortId}" TextColor="{StaticResource OceanText}" />
+                                </VerticalStackLayout>
+                                <Border Grid.Column="1" Padding="10,6" BackgroundColor="{StaticResource OceanSuccessSoft}" StrokeThickness="0" StrokeShape="RoundRectangle 12">
+                                    <Label Text="{Binding CourseCountText}" TextColor="{StaticResource OceanSuccessDark}" />
+                                </Border>
+                                <Label Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding CreatedAtText}" TextColor="{StaticResource OceanTextMuted}" />
+                                <Label Grid.Row="2" Grid.ColumnSpan="2" LineBreakMode="TailTruncation" Text="{Binding CourseCodes}" TextColor="{StaticResource OceanBlue}" />
+                                <Grid Grid.Row="3" Grid.ColumnSpan="2" ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,6,0,0">
+                                    <Button Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HistoryViewModel}}, Path=OpenDetailsCommand}" CommandParameter="{Binding .}" Text="Details" />
+                                    <Button Grid.Column="1" BackgroundColor="{StaticResource OceanDanger}" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HistoryViewModel}}, Path=DeleteCommand}" CommandParameter="{Binding .}" Text="Delete" />
+                                </Grid>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+
+        <VerticalStackLayout Grid.Row="2" Padding="16,8" BackgroundColor="{StaticResource OceanSurface}" Spacing="6">
+            <Label HorizontalTextAlignment="Center" IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotNullOrEmptyConverter}}" Text="{Binding ErrorMessage}" TextColor="{StaticResource OceanDangerDark}" />
+            <ActivityIndicator IsRunning="{Binding IsLoadingMore}" IsVisible="{Binding IsLoadingMore}" />
+            <Button BackgroundColor="{StaticResource OceanDanger}" Command="{Binding ClearCommand}" IsEnabled="{Binding HasRegistrations}" Text="Clear history" />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

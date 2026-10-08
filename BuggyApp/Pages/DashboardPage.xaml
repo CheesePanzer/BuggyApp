@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="BuggyApp.Pages.DashboardPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:BuggyApp.ViewModels"
+    x:DataType="vm:DashboardViewModel"
+    Title="Home"
+    Style="{StaticResource OceanPage}">
+
+    <Grid RowDefinitions="Auto,*">
+        <Grid Padding="24,26,24,22" Style="{StaticResource OceanHeader}">
+            <VerticalStackLayout Spacing="4">
+                <Label FontSize="12" Text="COURSE REGISTRATION LAB" TextColor="{StaticResource OceanMint}" />
+                <Label FontAttributes="Bold" FontSize="30" Style="{StaticResource OceanHeaderTitle}" Text="Enrollment desk" />
+                <Label Style="{StaticResource OceanHeaderText}" Text="A GUI stress-testing workspace" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="20" Spacing="18">
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                    <Border Padding="12" BackgroundColor="{StaticResource OceanSurface}" Stroke="{StaticResource OceanBorder}" StrokeShape="RoundRectangle 14">
+                        <VerticalStackLayout>
+                            <Label FontAttributes="Bold" FontSize="26" Text="{Binding CourseCount}" TextColor="{StaticResource OceanText}" />
+                            <Label FontSize="11" Text="COURSES" TextColor="{StaticResource OceanTextMuted}" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Column="1" Padding="12" BackgroundColor="{StaticResource OceanAccentSoft}" Stroke="{StaticResource OceanAccent}" StrokeShape="RoundRectangle 14">
+                        <VerticalStackLayout>
+                            <Label FontAttributes="Bold" FontSize="26" Text="{Binding BasketCount}" TextColor="{StaticResource OceanText}" />
+                            <Label FontSize="11" Text="IN BASKET" TextColor="{StaticResource OceanTextMuted}" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Column="2" Padding="12" BackgroundColor="{StaticResource OceanSuccessSoft}" Stroke="{StaticResource OceanMint}" StrokeShape="RoundRectangle 14">
+                        <VerticalStackLayout>
+                            <Label FontAttributes="Bold" FontSize="26" Text="{Binding RegistrationCount}" TextColor="{StaticResource OceanText}" />
+                            <Label FontSize="11" Text="RECORDS" TextColor="{StaticResource OceanTextMuted}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <Border Padding="20" BackgroundColor="{StaticResource OceanSurface}" Stroke="{StaticResource OceanBorder}" StrokeShape="RoundRectangle 18">
+                    <VerticalStackLayout Spacing="14">
+                        <Label FontAttributes="Bold" FontSize="20" Text="Start exploring" TextColor="{StaticResource OceanText}" />
+                        <Label Text="Browse a long course catalog, add courses to a binary basket, and stress the asynchronous registration flow." TextColor="{StaticResource OceanTextSecondary}" />
+                        <Button Command="{Binding OpenCatalogCommand}" Text="Browse course catalog" />
+                        <Button BackgroundColor="{StaticResource OceanAccent}" Command="{Binding OpenBasketCommand}" Text="Open selection basket" TextColor="{StaticResource OceanNavy}" />
+                        <Button BackgroundColor="{StaticResource OceanMint}" Command="{Binding OpenHistoryCommand}" Text="View registration history" TextColor="{StaticResource OceanNavy}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="20" BackgroundColor="{StaticResource OceanNavy}" StrokeThickness="0" StrokeShape="RoundRectangle 18">
+                    <VerticalStackLayout Spacing="12">
+                        <Label FontAttributes="Bold" FontSize="18" Text="Monkey test controls" TextColor="{StaticResource OceanOnPrimary}" />
+                        <Label Text="Refresh repeatedly or reset while requests are active to exercise async and lifecycle paths." TextColor="{StaticResource OceanMutedOnDark}" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <Button Command="{Binding LoadCommand}" Text="Refresh" />
+                            <Button Grid.Column="1" BackgroundColor="{StaticResource OceanDanger}" Command="{Binding ResetCommand}" Text="Reset data" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotNullOrEmptyConverter}}" Text="{Binding ErrorMessage}" TextColor="{StaticResource OceanDangerDark}" />
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="BuggyApp.Pages.CourseDetailPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:BuggyApp.ViewModels"
+    x:DataType="vm:CourseDetailViewModel"
+    Title="Course detail"
+    Style="{StaticResource OceanPage}">
+
+    <Grid RowDefinitions="*,Auto">
+        <ScrollView>
+            <VerticalStackLayout Padding="20" Spacing="18">
+                <Border Padding="22" BackgroundColor="{StaticResource OceanNavy}" StrokeThickness="0" StrokeShape="RoundRectangle 20">
+                    <VerticalStackLayout Spacing="8">
+                        <Label FontAttributes="Bold" FontSize="13" Text="{Binding Course.Code}" TextColor="{StaticResource OceanMint}" />
+                        <Label FontAttributes="Bold" FontSize="30" Text="{Binding Course.Title}" TextColor="{StaticResource OceanOnPrimary}" />
+                        <Label Text="{Binding Course.Category}" TextColor="{StaticResource OceanAccent}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="20" BackgroundColor="{StaticResource OceanSurface}" Stroke="{StaticResource OceanBorder}" StrokeShape="RoundRectangle 16">
+                    <VerticalStackLayout Spacing="14">
+                        <Label FontAttributes="Bold" FontSize="12" Text="INSTRUCTOR" TextColor="{StaticResource OceanBlue}" />
+                        <Label FontSize="18" Text="{Binding Course.Instructor}" TextColor="{StaticResource OceanText}" />
+                        <BoxView HeightRequest="1" BackgroundColor="{StaticResource OceanDivider}" />
+                        <Label FontAttributes="Bold" FontSize="12" Text="ABOUT THIS COURSE" TextColor="{StaticResource OceanBlue}" />
+                        <Label LineHeight="1.35" Text="{Binding Course.Description}" TextColor="{StaticResource OceanTextSecondary}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <Button Command="{Binding ShowInformationCommand}" Text="Information" />
+                    <Button Grid.Column="1" Command="{Binding LoadCommand}" Text="Refresh" />
+                </Grid>
+
+                <Label IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotNullOrEmptyConverter}}" Text="{Binding ErrorMessage}" TextColor="{StaticResource OceanDangerDark}" />
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Grid Grid.Row="1" Padding="16" BackgroundColor="{StaticResource OceanSurface}" ColumnDefinitions="Auto,*" ColumnSpacing="10">
+            <Button Command="{Binding GoBackCommand}" Text="Back" />
+            <Button Grid.Column="1" BackgroundColor="{StaticResource OceanAccent}" Command="{Binding ToggleBasketCommand}" IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}" Text="{Binding ActionText}" TextColor="{StaticResource OceanNavy}" />
+        </Grid>
+    </Grid>
+</ContentPage>

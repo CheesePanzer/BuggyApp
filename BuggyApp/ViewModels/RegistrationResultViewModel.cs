@@ -1,0 +1,83 @@
+using System.Collections.ObjectModel;
+using BuggyApp.Models;
+using BuggyApp.Services;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+
+namespace BuggyApp.ViewModels;
+
+public partial class RegistrationResultViewModel : PageViewModel
+{
+    private readonly IMockedCourseController _controller;
+    private readonly INavigationService _navigation;
+    private Guid _registrationId;
+
+    public RegistrationResultViewModel(
+        IMockedCourseController controller,
+        INavigationService navigation)
+    {
+        _controller = controller;
+        _navigation = navigation;
+    }
+
+    public ObservableCollection<CourseItemViewModel> Courses { get; } = [];
+
+    [ObservableProperty]
+    public partial string RegistrationCode { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string CreatedAtText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial int CourseCount { get; set; }
+
+    public void ApplyRegistrationId(Guid registrationId)
+    {
+        _registrationId = registrationId;
+    }
+
+    protected override Task OnAppearingAsync(CancellationToken cancellationToken) => LoadAsync();
+
+    [RelayCommand]
+    private Task LoadAsync() => RunBusyAsync(async cancellationToken =>
+    {
+        if (_registrationId == Guid.Empty)
+        {
+            ErrorMessage = "No registration result was supplied.";
+            return;
+        }
+
+        var registration = await _controller.GetRegistrationAsync(_registrationId, cancellationToken);
+        if (registration is null)
+        {
+            ErrorMessage = "This registration record no longer exists.";
+            return;
+        }
+
+        RegistrationCode = registration.Id.ToString("N")[..8].ToUpperInvariant();
+        CreatedAtText = registration.CreatedAt.LocalDateTime.ToString("MMM d, yyyy · h:mm tt");
+        CourseCount = registration.Courses.Count;
+        ReplaceCourses(registration.Courses);
+    });
+
+    [RelayCommand]
+    private Task OpenHistoryAsync() => _navigation.GoToAsync("//history");
+
+    [RelayCommand]
+    private Task OpenCatalogAsync() => _navigation.GoToAsync("//catalog");
+
+    [RelayCommand]
+    private Task OpenDetailsAsync() =>
+        _navigation.GoToAsync(
+            "registration-detail",
+            new Dictionary<string, object> { ["RegistrationId"] = _registrationId });
+
+    private void ReplaceCourses(IEnumerable<Course> courses)
+    {
+        Courses.Clear();
+        foreach (var course in courses)
+        {
+            Courses.Add(new CourseItemViewModel(course, false));
+        }
+    }
+}

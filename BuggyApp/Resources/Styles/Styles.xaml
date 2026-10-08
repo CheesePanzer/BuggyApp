@@ -13,9 +13,57 @@
     </Style>
 
     <Style TargetType="Border">
-        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray500}}" />
-        <Setter Property="StrokeShape" Value="Rectangle"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource OceanSurface}, Dark={StaticResource OceanNavy}}" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource OceanBorder}, Dark={StaticResource OceanBlue}}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 14"/>
         <Setter Property="StrokeThickness" Value="1"/>
+    </Style>
+
+    <Style x:Key="OceanPage" TargetType="ContentPage">
+        <Setter Property="BackgroundColor" Value="{StaticResource OceanBackground}" />
+    </Style>
+
+    <Style x:Key="OceanHeader" TargetType="Grid">
+        <Setter Property="BackgroundColor" Value="{StaticResource OceanNavy}" />
+    </Style>
+
+    <Style x:Key="OceanSurfacePanel" TargetType="Grid">
+        <Setter Property="BackgroundColor" Value="{StaticResource OceanSurface}" />
+    </Style>
+
+    <Style x:Key="OceanCard" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource OceanSurface}" />
+        <Setter Property="Stroke" Value="{StaticResource OceanBorder}" />
+    </Style>
+
+    <Style x:Key="OceanHeading" TargetType="Label">
+        <Setter Property="TextColor" Value="{StaticResource OceanText}" />
+    </Style>
+
+    <Style x:Key="OceanMutedText" TargetType="Label">
+        <Setter Property="TextColor" Value="{StaticResource OceanTextMuted}" />
+    </Style>
+
+    <Style x:Key="OceanHeaderTitle" TargetType="Label">
+        <Setter Property="TextColor" Value="{StaticResource OceanOnPrimary}" />
+    </Style>
+
+    <Style x:Key="OceanHeaderText" TargetType="Label">
+        <Setter Property="TextColor" Value="{StaticResource OceanMutedOnDark}" />
+    </Style>
+
+    <Style x:Key="OceanAccentButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource OceanAccent}" />
+        <Setter Property="TextColor" Value="{StaticResource OceanNavy}" />
+    </Style>
+
+    <Style x:Key="OceanDangerButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource OceanDanger}" />
+        <Setter Property="TextColor" Value="{StaticResource OceanOnPrimary}" />
+    </Style>
+
+    <Style x:Key="OceanErrorText" TargetType="Label">
+        <Setter Property="TextColor" Value="{StaticResource OceanDangerDark}" />
     </Style>
 
     <Style TargetType="BoxView">
@@ -28,7 +76,7 @@
         <Setter Property="FontFamily" Value="OpenSansRegular"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="BorderWidth" Value="0"/>
-        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="CornerRadius" Value="12"/>
         <Setter Property="Padding" Value="14,10"/>
         <Setter Property="MinimumHeightRequest" Value="44"/>
         <Setter Property="MinimumWidthRequest" Value="44"/>
@@ -402,20 +450,20 @@
 
     <Style TargetType="Page" ApplyToDerivedTypes="True">
         <Setter Property="Padding" Value="0"/>
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource OceanBackground}, Dark={StaticResource OffBlack}}" />
     </Style>
 
     <Style TargetType="Shell" ApplyToDerivedTypes="True">
-        <Setter Property="Shell.BackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}" />
-        <Setter Property="Shell.ForegroundColor" Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource SecondaryDarkText}}" />
-        <Setter Property="Shell.TitleColor" Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource SecondaryDarkText}}" />
+        <Setter Property="Shell.BackgroundColor" Value="{AppThemeBinding Light={StaticResource OceanSurface}, Dark={StaticResource OffBlack}}" />
+        <Setter Property="Shell.ForegroundColor" Value="{AppThemeBinding Light={StaticResource OceanBlue}, Dark={StaticResource SecondaryDarkText}}" />
+        <Setter Property="Shell.TitleColor" Value="{AppThemeBinding Light={StaticResource OceanNavy}, Dark={StaticResource SecondaryDarkText}}" />
         <Setter Property="Shell.DisabledColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray950}}" />
         <Setter Property="Shell.UnselectedColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray200}}" />
         <Setter Property="Shell.NavBarHasShadow" Value="False" />
-        <Setter Property="Shell.TabBarBackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}" />
-        <Setter Property="Shell.TabBarForegroundColor" Value="{AppThemeBinding Light={StaticResource Magenta}, Dark={StaticResource White}}" />
-        <Setter Property="Shell.TabBarTitleColor" Value="{AppThemeBinding Light={StaticResource Magenta}, Dark={StaticResource White}}" />
-        <Setter Property="Shell.TabBarUnselectedColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray200}}" />
+        <Setter Property="Shell.TabBarBackgroundColor" Value="{AppThemeBinding Light={StaticResource OceanSurface}, Dark={StaticResource OffBlack}}" />
+        <Setter Property="Shell.TabBarForegroundColor" Value="{AppThemeBinding Light={StaticResource OceanBlue}, Dark={StaticResource OceanMint}}" />
+        <Setter Property="Shell.TabBarTitleColor" Value="{AppThemeBinding Light={StaticResource OceanBlue}, Dark={StaticResource OceanMint}}" />
+        <Setter Property="Shell.TabBarUnselectedColor" Value="{AppThemeBinding Light={StaticResource OceanTextMuted}, Dark={StaticResource Gray200}}" />
     </Style>
 
     <Style TargetType="NavigationPage">
