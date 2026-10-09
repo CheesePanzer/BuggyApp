@@ -21,4 +21,6 @@ public static class BugIds
     public const string DashboardRefreshAnr = "ANR-01";
     public const string CatalogRefreshAnr = "ANR-02";
     public const string BasketRegisterAnr = "ANR-03";
+
+    public const string HistoryDeleteOpenRace = "RACE-01";
 }

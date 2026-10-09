@@ -50,7 +50,7 @@
                             <Button Grid.Column="1" Command="{Binding DisableAllBugsCommand}" Text="Disable all" />
                         </Grid>
 
-                        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="10">
+                        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="10">
                             <Label Style="{StaticResource OceanHeading}" Text="Command re-entry" VerticalOptions="Center" />
                             <Switch Grid.Column="1" IsToggled="{Binding CommandReentryEnabled}" />
 
@@ -65,6 +65,9 @@
 
                             <Label Grid.Row="4" Style="{StaticResource OceanHeading}" Text="UI thread blocking" VerticalOptions="Center" />
                             <Switch Grid.Row="4" Grid.Column="1" IsToggled="{Binding UiThreadBlockingEnabled}" />
+
+                            <Label Grid.Row="5" Style="{StaticResource OceanHeading}" Text="State race" VerticalOptions="Center" />
+                            <Switch Grid.Row="5" Grid.Column="1" IsToggled="{Binding StateRaceEnabled}" />
                         </Grid>
 
                         <Label FontAttributes="Bold" Style="{StaticResource OceanHeading}" Text="Trigger mode" />

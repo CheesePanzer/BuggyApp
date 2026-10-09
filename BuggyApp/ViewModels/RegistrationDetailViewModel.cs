@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using BuggyApp.BugInjection;
 using BuggyApp.Models;
 using BuggyApp.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -11,16 +12,19 @@ public partial class RegistrationDetailViewModel : PageViewModel
     private readonly IMockedCourseController _controller;
     private readonly INavigationService _navigation;
     private readonly IDialogService _dialogs;
+    private readonly IBugInjectionManager _bugManager;
     private Guid _registrationId;
 
     public RegistrationDetailViewModel(
         IMockedCourseController controller,
         INavigationService navigation,
-        IDialogService dialogs)
+        IDialogService dialogs,
+        IBugInjectionManager bugManager)
     {
         _controller = controller;
         _navigation = navigation;
         _dialogs = dialogs;
+        _bugManager = bugManager;
     }
 
     public ObservableCollection<CourseItemViewModel> Courses { get; } = [];
@@ -57,6 +61,15 @@ public partial class RegistrationDetailViewModel : PageViewModel
         var registration = await _controller.GetRegistrationAsync(_registrationId, cancellationToken);
         if (registration is null)
         {
+            if (_bugManager.TryTrigger(
+                BugIds.HistoryDeleteOpenRace,
+                $"RegistrationId={_registrationId}"))
+            {
+                throw new InjectedBugException(
+                    BugIds.HistoryDeleteOpenRace,
+                    $"Registration {_registrationId} was deleted before its detail request completed.");
+            }
+
             ErrorMessage = "This registration record no longer exists.";
             RecordExists = false;
             Courses.Clear();

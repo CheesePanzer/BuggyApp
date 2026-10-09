@@ -18,7 +18,8 @@ public sealed class BugCatalog
         new(BugIds.ConfirmationDialogReentry, BugScenario.NavigationReentry, "Shared", "Confirm", "Multiple confirmation dialogs overlap."),
         new(BugIds.DashboardRefreshAnr, BugScenario.UiThreadBlocking, "Dashboard", "Refresh", "Dashboard refresh blocks the UI thread."),
         new(BugIds.CatalogRefreshAnr, BugScenario.UiThreadBlocking, "Catalog", "Refresh", "Catalog refresh blocks the UI thread."),
-        new(BugIds.BasketRegisterAnr, BugScenario.UiThreadBlocking, "Basket", "Register", "Registration blocks the UI thread.")
+        new(BugIds.BasketRegisterAnr, BugScenario.UiThreadBlocking, "Basket", "Register", "Registration blocks the UI thread."),
+        new(BugIds.HistoryDeleteOpenRace, BugScenario.StateRace, "History/RegistrationDetail", "Delete/OpenDetails", "A detail request reads a registration after deletion completes.")
     ];
 
     private readonly IReadOnlyDictionary<string, BugDefinition> _byId =

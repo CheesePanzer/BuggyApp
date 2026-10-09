@@ -9,9 +9,11 @@ public enum BugScenario
     Lifecycle = 1 << 2,
     NavigationReentry = 1 << 3,
     UiThreadBlocking = 1 << 4,
+    StateRace = 1 << 5,
     All = CommandReentry
         | CollectionRace
         | Lifecycle
         | NavigationReentry
         | UiThreadBlocking
+        | StateRace
 }

@@ -50,6 +50,9 @@ public partial class MonkeyTestViewModel : PageViewModel
     public partial bool UiThreadBlockingEnabled { get; set; }
 
     [ObservableProperty]
+    public partial bool StateRaceEnabled { get; set; }
+
+    [ObservableProperty]
     public partial int SelectedTriggerModeIndex { get; set; }
 
     [ObservableProperty]
@@ -82,6 +85,9 @@ public partial class MonkeyTestViewModel : PageViewModel
 
     partial void OnUiThreadBlockingEnabledChanged(bool value) =>
         UpdateScenario(BugScenario.UiThreadBlocking, value);
+
+    partial void OnStateRaceEnabledChanged(bool value) =>
+        UpdateScenario(BugScenario.StateRace, value);
 
     partial void OnSelectedTriggerModeIndexChanged(int value)
     {
@@ -165,6 +171,7 @@ public partial class MonkeyTestViewModel : PageViewModel
             LifecycleEnabled = _bugManager.IsScenarioEnabled(BugScenario.Lifecycle);
             NavigationReentryEnabled = _bugManager.IsScenarioEnabled(BugScenario.NavigationReentry);
             UiThreadBlockingEnabled = _bugManager.IsScenarioEnabled(BugScenario.UiThreadBlocking);
+            StateRaceEnabled = _bugManager.IsScenarioEnabled(BugScenario.StateRace);
             SelectedTriggerModeIndex = (int)_bugManager.TriggerMode;
             EnabledScenariosText = _bugManager.EnabledScenarios.ToString();
         }

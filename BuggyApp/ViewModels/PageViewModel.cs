@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using BuggyApp.BugInjection;
 
 namespace BuggyApp.ViewModels;
 
@@ -62,6 +63,10 @@ public abstract partial class PageViewModel : ObservableObject
         }
         catch (OperationCanceledException) when (PageCancellationToken.IsCancellationRequested)
         {
+        }
+        catch (InjectedBugException)
+        {
+            throw;
         }
         catch (Exception exception)
         {
