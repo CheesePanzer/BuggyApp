@@ -55,7 +55,7 @@
                                 <Label Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Instructor, StringFormat='Instructor: {0}'}" TextColor="{StaticResource OceanTextMuted}" />
                                 <Grid Grid.Row="2" Grid.ColumnSpan="2" ColumnDefinitions="*,*" ColumnSpacing="10">
                                     <Button Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CatalogViewModel}}, Path=OpenDetailsCommand}" CommandParameter="{Binding .}" Text="Details" />
-                                    <Button Grid.Column="1" BackgroundColor="{StaticResource OceanAccent}" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CatalogViewModel}}, Path=ToggleBasketCommand}" CommandParameter="{Binding .}" IsEnabled="{Binding IsUpdating, Converter={StaticResource InvertedBoolConverter}}" Text="{Binding ActionText}" TextColor="{StaticResource OceanNavy}" />
+                                    <Button Grid.Column="1" BackgroundColor="{StaticResource OceanAccent}" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CatalogViewModel}}, Path=ToggleBasketCommand}" CommandParameter="{Binding .}" Text="{Binding ActionText}" TextColor="{StaticResource OceanNavy}" />
                                 </Grid>
                             </Grid>
                         </Border>

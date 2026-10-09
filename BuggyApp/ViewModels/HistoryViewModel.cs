@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.Collections.Concurrent;
+using BuggyApp.BugInjection;
 using BuggyApp.Models;
 using BuggyApp.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -11,6 +13,8 @@ public partial class HistoryViewModel : PageViewModel
     private readonly IMockedCourseController _controller;
     private readonly INavigationService _navigation;
     private readonly IDialogService _dialogs;
+    private readonly IBugInjectionManager _bugManager;
+    private readonly ConcurrentDictionary<Guid, byte> _activeDeleteOperations = new();
     private int _currentPage;
     private bool _hasMore;
     private bool _loadingMore;
@@ -18,11 +22,13 @@ public partial class HistoryViewModel : PageViewModel
     public HistoryViewModel(
         IMockedCourseController controller,
         INavigationService navigation,
-        IDialogService dialogs)
+        IDialogService dialogs,
+        IBugInjectionManager bugManager)
     {
         _controller = controller;
         _navigation = navigation;
         _dialogs = dialogs;
+        _bugManager = bugManager;
     }
 
     public ObservableCollection<RegistrationItemViewModel> Registrations { get; } = [];
@@ -87,9 +93,15 @@ public partial class HistoryViewModel : PageViewModel
             new Dictionary<string, object> { ["RegistrationId"] = registration.Id },
             PageCancellationToken);
 
-    [RelayCommand]
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task DeleteAsync(RegistrationItemViewModel registration)
     {
+        if (_bugManager.IsEnabled(BugIds.HistoryDeleteReentry))
+        {
+            await DeleteWithReentryBugAsync(registration);
+            return;
+        }
+
         var confirmed = await _dialogs.ConfirmAsync(
             "Delete registration?",
             $"Delete registration {registration.ShortId}?",
@@ -107,6 +119,47 @@ public partial class HistoryViewModel : PageViewModel
             Registrations.Remove(registration);
             RegistrationCount = Registrations.Count;
         });
+    }
+
+    private async Task DeleteWithReentryBugAsync(RegistrationItemViewModel registration)
+    {
+        if (!_activeDeleteOperations.TryAdd(registration.Id, 0))
+        {
+            if (_bugManager.TryTrigger(
+                BugIds.HistoryDeleteReentry,
+                $"RegistrationId={registration.Id}"))
+            {
+                throw new InjectedBugException(
+                    BugIds.HistoryDeleteReentry,
+                    $"Registration {registration.Id} received concurrent delete commands.");
+            }
+
+            return;
+        }
+
+        try
+        {
+            var confirmed = await _dialogs.ConfirmAsync(
+                "Delete registration?",
+                $"Delete registration {registration.ShortId}?",
+                "Delete",
+                "Cancel");
+
+            if (!confirmed)
+            {
+                return;
+            }
+
+            await _controller.DeleteRegistrationAsync(
+                registration.Id,
+                PageCancellationToken);
+            Registrations.Remove(registration);
+            RegistrationCount = Registrations.Count;
+        }
+        finally
+        {
+            _activeDeleteOperations.TryRemove(registration.Id, out _);
+        }
     }
 
     [RelayCommand]

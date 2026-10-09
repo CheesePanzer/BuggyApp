@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using BuggyApp.BugInjection;
 using BuggyApp.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -10,15 +11,19 @@ public partial class BasketViewModel : PageViewModel
     private readonly IMockedCourseController _controller;
     private readonly INavigationService _navigation;
     private readonly IDialogService _dialogs;
+    private readonly IBugInjectionManager _bugManager;
+    private int _registrationInProgress;
 
     public BasketViewModel(
         IMockedCourseController controller,
         INavigationService navigation,
-        IDialogService dialogs)
+        IDialogService dialogs,
+        IBugInjectionManager bugManager)
     {
         _controller = controller;
         _navigation = navigation;
         _dialogs = dialogs;
+        _bugManager = bugManager;
     }
 
     public ObservableCollection<CourseItemViewModel> Courses { get; } = [];
@@ -100,9 +105,15 @@ public partial class BasketViewModel : PageViewModel
         });
     }
 
-    [RelayCommand]
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task RegisterAsync()
     {
+        if (_bugManager.IsEnabled(BugIds.BasketRegisterReentry))
+        {
+            await RegisterWithReentryBugAsync();
+            return;
+        }
+
         if (!HasCourses || IsBusy)
         {
             return;
@@ -128,6 +139,53 @@ public partial class BasketViewModel : PageViewModel
                 "registration-result",
                 new Dictionary<string, object> { ["RegistrationId"] = registration.Id });
         });
+    }
+
+    private async Task RegisterWithReentryBugAsync()
+    {
+        if (!HasCourses)
+        {
+            return;
+        }
+
+        if (Interlocked.CompareExchange(ref _registrationInProgress, 1, 0) != 0)
+        {
+            if (_bugManager.TryTrigger(
+                BugIds.BasketRegisterReentry,
+                $"BasketCourseCount={CourseCount}"))
+            {
+                throw new InjectedBugException(
+                    BugIds.BasketRegisterReentry,
+                    "The registration command was entered while another submission was active.");
+            }
+
+            return;
+        }
+
+        try
+        {
+            var confirmed = await _dialogs.ConfirmAsync(
+                "Confirm registration?",
+                $"Register the {CourseCount} selected courses?",
+                "Register",
+                "Cancel");
+
+            if (!confirmed)
+            {
+                return;
+            }
+
+            var registration = await _controller.RegisterAsync(PageCancellationToken);
+            Courses.Clear();
+            CourseCount = 0;
+            await _navigation.GoToAsync(
+                "registration-result",
+                new Dictionary<string, object> { ["RegistrationId"] = registration.Id });
+        }
+        finally
+        {
+            Interlocked.Exchange(ref _registrationInProgress, 0);
+        }
     }
 
     [RelayCommand]

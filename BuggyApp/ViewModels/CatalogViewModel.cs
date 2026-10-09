@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.Collections.Concurrent;
+using BuggyApp.BugInjection;
 using BuggyApp.Models;
 using BuggyApp.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -10,16 +12,20 @@ public partial class CatalogViewModel : PageViewModel
 {
     private readonly IMockedCourseController _controller;
     private readonly INavigationService _navigation;
+    private readonly IBugInjectionManager _bugManager;
+    private readonly ConcurrentDictionary<int, byte> _activeBasketOperations = new();
     private int _currentPage;
     private bool _hasMore;
     private bool _isLoadingMore;
 
     public CatalogViewModel(
         IMockedCourseController controller,
-        INavigationService navigation)
+        INavigationService navigation,
+        IBugInjectionManager bugManager)
     {
         _controller = controller;
         _navigation = navigation;
+        _bugManager = bugManager;
     }
 
     public ObservableCollection<CourseItemViewModel> Courses { get; } = [];
@@ -119,8 +125,40 @@ public partial class CatalogViewModel : PageViewModel
         }
     }
 
-    [RelayCommand]
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task ToggleBasketAsync(CourseItemViewModel course)
+    {
+        if (!_bugManager.IsEnabled(BugIds.CatalogToggleReentry))
+        {
+            await ToggleBasketProtectedAsync(course);
+            return;
+        }
+
+        if (!_activeBasketOperations.TryAdd(course.Id, 0))
+        {
+            if (_bugManager.TryTrigger(
+                BugIds.CatalogToggleReentry,
+                $"CourseId={course.Id}"))
+            {
+                throw new InjectedBugException(
+                    BugIds.CatalogToggleReentry,
+                    $"Course {course.Id} received concurrent Add/Remove commands.");
+            }
+
+            return;
+        }
+
+        try
+        {
+            await ToggleBasketCoreAsync(course);
+        }
+        finally
+        {
+            _activeBasketOperations.TryRemove(course.Id, out _);
+        }
+    }
+
+    private async Task ToggleBasketProtectedAsync(CourseItemViewModel course)
     {
         if (course.IsUpdating)
         {
@@ -132,16 +170,7 @@ public partial class CatalogViewModel : PageViewModel
 
         try
         {
-            if (course.IsInBasket)
-            {
-                await _controller.RemoveFromBasketAsync(course.Id, PageCancellationToken);
-                course.IsInBasket = false;
-            }
-            else
-            {
-                await _controller.AddToBasketAsync(course.Id, PageCancellationToken);
-                course.IsInBasket = true;
-            }
+            await ToggleBasketCoreAsync(course);
         }
         catch (OperationCanceledException) when (PageCancellationToken.IsCancellationRequested)
         {
@@ -153,6 +182,20 @@ public partial class CatalogViewModel : PageViewModel
         finally
         {
             course.IsUpdating = false;
+        }
+    }
+
+    private async Task ToggleBasketCoreAsync(CourseItemViewModel course)
+    {
+        if (course.IsInBasket)
+        {
+            await _controller.RemoveFromBasketAsync(course.Id, PageCancellationToken);
+            course.IsInBasket = false;
+        }
+        else
+        {
+            await _controller.AddToBasketAsync(course.Id, PageCancellationToken);
+            course.IsInBasket = true;
         }
     }
 
