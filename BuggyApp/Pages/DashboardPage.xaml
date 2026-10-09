@@ -12,7 +12,11 @@
         <Grid Padding="24,26,24,22" Style="{StaticResource OceanHeader}">
             <VerticalStackLayout Spacing="4">
                 <Label FontSize="12" Text="COURSE REGISTRATION LAB" TextColor="{StaticResource OceanMint}" />
-                <Label FontAttributes="Bold" FontSize="30" Style="{StaticResource OceanHeaderTitle}" Text="Enrollment desk" />
+                <Label FontAttributes="Bold" FontSize="30" Style="{StaticResource OceanHeaderTitle}" Text="Enrollment desk">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding UnlockMonkeyTestCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
                 <Label Style="{StaticResource OceanHeaderText}" Text="A GUI stress-testing workspace" />
             </VerticalStackLayout>
         </Grid>
@@ -47,17 +51,6 @@
                         <Button Command="{Binding OpenCatalogCommand}" Text="Browse course catalog" />
                         <Button BackgroundColor="{StaticResource OceanAccent}" Command="{Binding OpenBasketCommand}" Text="Open selection basket" TextColor="{StaticResource OceanNavy}" />
                         <Button BackgroundColor="{StaticResource OceanMint}" Command="{Binding OpenHistoryCommand}" Text="View registration history" TextColor="{StaticResource OceanNavy}" />
-                    </VerticalStackLayout>
-                </Border>
-
-                <Border Padding="20" BackgroundColor="{StaticResource OceanNavy}" StrokeThickness="0" StrokeShape="RoundRectangle 18">
-                    <VerticalStackLayout Spacing="12">
-                        <Label FontAttributes="Bold" FontSize="18" Text="Monkey test controls" TextColor="{StaticResource OceanOnPrimary}" />
-                        <Label Text="Refresh repeatedly or reset while requests are active to exercise async and lifecycle paths." TextColor="{StaticResource OceanMutedOnDark}" />
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                            <Button Command="{Binding LoadCommand}" Text="Refresh" />
-                            <Button Grid.Column="1" BackgroundColor="{StaticResource OceanDanger}" Command="{Binding ResetCommand}" Text="Reset data" />
-                        </Grid>
                     </VerticalStackLayout>
                 </Border>
 

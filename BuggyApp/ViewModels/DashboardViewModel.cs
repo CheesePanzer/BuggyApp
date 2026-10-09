@@ -8,16 +8,14 @@ public partial class DashboardViewModel : PageViewModel
 {
     private readonly IMockedCourseController _controller;
     private readonly INavigationService _navigation;
-    private readonly IDialogService _dialogs;
+    private int _titleTapCount;
 
     public DashboardViewModel(
         IMockedCourseController controller,
-        INavigationService navigation,
-        IDialogService dialogs)
+        INavigationService navigation)
     {
         _controller = controller;
         _navigation = navigation;
-        _dialogs = dialogs;
     }
 
     [ObservableProperty]
@@ -51,26 +49,15 @@ public partial class DashboardViewModel : PageViewModel
     private Task OpenHistoryAsync() => _navigation.GoToAsync("//history");
 
     [RelayCommand]
-    private async Task ResetAsync()
+    private async Task UnlockMonkeyTestAsync()
     {
-        var confirmed = await _dialogs.ConfirmAsync(
-            "Reset demo data?",
-            "The basket and registration history will return to their initial test state.",
-            "Reset",
-            "Cancel");
-
-        if (!confirmed)
+        _titleTapCount++;
+        if (_titleTapCount < 15)
         {
             return;
         }
 
-        await RunBusyAsync(async cancellationToken =>
-        {
-            await _controller.ResetDemoAsync(cancellationToken);
-            var summary = await _controller.GetDashboardAsync(cancellationToken);
-            CourseCount = summary.CourseCount;
-            BasketCount = summary.BasketCount;
-            RegistrationCount = summary.RegistrationCount;
-        });
+        _titleTapCount = 0;
+        await _navigation.GoToAsync("monkey-test", cancellationToken: PageCancellationToken);
     }
 }

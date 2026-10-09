@@ -24,6 +24,9 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(
             "registration-detail",
             new ServiceRouteFactory(services, typeof(RegistrationDetailPage)));
+        Routing.RegisterRoute(
+            "monkey-test",
+            new ServiceRouteFactory(services, typeof(MonkeyTestPage)));
     }
 
     private static ShellContent CreateTab<TPage>(

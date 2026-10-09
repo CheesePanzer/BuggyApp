@@ -39,6 +39,7 @@ namespace BuggyApp
             builder.Services.AddTransient<HistoryPage>();
             builder.Services.AddTransient<RegistrationResultPage>();
             builder.Services.AddTransient<RegistrationDetailPage>();
+            builder.Services.AddTransient<MonkeyTestPage>();
 
             builder.Services.AddTransient<DashboardViewModel>();
             builder.Services.AddTransient<CatalogViewModel>();
@@ -47,6 +48,7 @@ namespace BuggyApp
             builder.Services.AddTransient<HistoryViewModel>();
             builder.Services.AddTransient<RegistrationResultViewModel>();
             builder.Services.AddTransient<RegistrationDetailViewModel>();
+            builder.Services.AddTransient<MonkeyTestViewModel>();
 
 #if DEBUG
     		builder.Logging.AddDebug();
