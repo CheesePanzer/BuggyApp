@@ -40,6 +40,47 @@
                     </Border>
                 </Grid>
 
+                <Border Padding="20" Style="{StaticResource OceanCard}">
+                    <VerticalStackLayout Spacing="14">
+                        <Label FontAttributes="Bold" FontSize="20" Style="{StaticResource OceanHeading}" Text="Bug configuration" />
+                        <Label Style="{StaticResource OceanMutedText}" Text="Enable bug categories for the current app process. Individual bug controls are intentionally omitted." />
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <Button Command="{Binding EnableAllBugsCommand}" Text="Enable all" />
+                            <Button Grid.Column="1" Command="{Binding DisableAllBugsCommand}" Text="Disable all" />
+                        </Grid>
+
+                        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="10">
+                            <Label Style="{StaticResource OceanHeading}" Text="Command re-entry" VerticalOptions="Center" />
+                            <Switch Grid.Column="1" IsToggled="{Binding CommandReentryEnabled}" />
+
+                            <Label Grid.Row="1" Style="{StaticResource OceanHeading}" Text="Collection race" VerticalOptions="Center" />
+                            <Switch Grid.Row="1" Grid.Column="1" IsToggled="{Binding CollectionRaceEnabled}" />
+
+                            <Label Grid.Row="2" Style="{StaticResource OceanHeading}" Text="Lifecycle" VerticalOptions="Center" />
+                            <Switch Grid.Row="2" Grid.Column="1" IsToggled="{Binding LifecycleEnabled}" />
+
+                            <Label Grid.Row="3" Style="{StaticResource OceanHeading}" Text="Navigation re-entry" VerticalOptions="Center" />
+                            <Switch Grid.Row="3" Grid.Column="1" IsToggled="{Binding NavigationReentryEnabled}" />
+
+                            <Label Grid.Row="4" Style="{StaticResource OceanHeading}" Text="UI thread blocking" VerticalOptions="Center" />
+                            <Switch Grid.Row="4" Grid.Column="1" IsToggled="{Binding UiThreadBlockingEnabled}" />
+                        </Grid>
+
+                        <Label FontAttributes="Bold" Style="{StaticResource OceanHeading}" Text="Trigger mode" />
+                        <Picker ItemsSource="{Binding TriggerModes}" SelectedIndex="{Binding SelectedTriggerModeIndex}" />
+
+                        <Border Padding="12" BackgroundColor="{StaticResource OceanAccentSoft}" Stroke="{StaticResource OceanAccent}">
+                            <VerticalStackLayout Spacing="3">
+                                <Label FontSize="11" Style="{StaticResource OceanMutedText}" Text="ENABLED SCENARIOS" />
+                                <Label FontAttributes="Bold" Style="{StaticResource OceanHeading}" Text="{Binding EnabledScenariosText}" />
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Label FontSize="12" Style="{StaticResource OceanMutedText}" Text="Natural executes injected behavior. Record only logs reachability. Crash immediately throws an InjectedBugException after recording." />
+                    </VerticalStackLayout>
+                </Border>
+
                 <Border Padding="20" BackgroundColor="{StaticResource OceanNavy}" StrokeThickness="0" StrokeShape="RoundRectangle 18">
                     <VerticalStackLayout Spacing="12">
                         <Label FontAttributes="Bold" FontSize="18" Style="{StaticResource OceanHeaderTitle}" Text="Test data controls" />

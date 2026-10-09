@@ -5,6 +5,7 @@ using BuggyApp.Data;
 using BuggyApp.Services;
 using BuggyApp.Pages;
 using BuggyApp.ViewModels;
+using BuggyApp.BugInjection;
 
 namespace BuggyApp
 {
@@ -24,6 +25,9 @@ namespace BuggyApp
                 });
 
             builder.Services.AddSingleton(new MockServerOptions());
+            builder.Services.AddSingleton(new BugInjectionOptions());
+            builder.Services.AddSingleton<BugCatalog>();
+            builder.Services.AddSingleton<IBugInjectionManager, BugInjectionManager>();
             builder.Services.AddSingleton<MockedDb>();
             builder.Services.AddSingleton<IMockDelayProvider, MockDelayProvider>();
             builder.Services.AddSingleton<DiagnosticsService>();
