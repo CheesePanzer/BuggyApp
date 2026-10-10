@@ -226,7 +226,7 @@ public partial class CatalogViewModel : PageViewModel
         }
     }
 
-    [RelayCommand]
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private Task OpenDetailsAsync(CourseItemViewModel course) =>
         _navigation.GoToAsync(
             "course-detail",

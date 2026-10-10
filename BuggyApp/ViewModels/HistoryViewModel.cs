@@ -86,7 +86,7 @@ public partial class HistoryViewModel : PageViewModel
         }
     }
 
-    [RelayCommand]
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private Task OpenDetailsAsync(RegistrationItemViewModel registration) =>
         _navigation.GoToAsync(
             "registration-detail",
