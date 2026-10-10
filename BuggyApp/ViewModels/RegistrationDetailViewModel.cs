@@ -14,6 +14,7 @@ public partial class RegistrationDetailViewModel : PageViewModel
     private readonly IDialogService _dialogs;
     private readonly IBugInjectionManager _bugManager;
     private Guid _registrationId;
+    private bool _isPageActive;
 
     public RegistrationDetailViewModel(
         IMockedCourseController controller,
@@ -46,7 +47,16 @@ public partial class RegistrationDetailViewModel : PageViewModel
         _registrationId = registrationId;
     }
 
-    protected override Task OnAppearingAsync(CancellationToken cancellationToken) => LoadAsync();
+    protected override Task OnAppearingAsync(CancellationToken cancellationToken)
+    {
+        _isPageActive = true;
+        return LoadAsync();
+    }
+
+    protected override void OnDisappearing()
+    {
+        _isPageActive = false;
+    }
 
     [RelayCommand]
     private Task LoadAsync() => RunBusyAsync(async cancellationToken =>
@@ -58,7 +68,21 @@ public partial class RegistrationDetailViewModel : PageViewModel
             return;
         }
 
-        var registration = await _controller.GetRegistrationAsync(_registrationId, cancellationToken);
+        var requestToken = _bugManager.IsEnabled(BugIds.RegistrationDetailAfterClose)
+            ? CancellationToken.None
+            : cancellationToken;
+        var registration = await _controller.GetRegistrationAsync(_registrationId, requestToken);
+
+        if (!_isPageActive
+            && _bugManager.TryTrigger(
+                BugIds.RegistrationDetailAfterClose,
+                $"RegistrationId={_registrationId}"))
+        {
+            throw new InjectedBugException(
+                BugIds.RegistrationDetailAfterClose,
+                $"Registration {_registrationId} completed loading after its page closed.");
+        }
+
         if (registration is null)
         {
             if (_bugManager.TryTrigger(

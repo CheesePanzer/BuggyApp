@@ -1,3 +1,4 @@
+using BuggyApp.BugInjection;
 using BuggyApp.Models;
 using BuggyApp.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -10,16 +11,20 @@ public partial class CourseDetailViewModel : PageViewModel
     private readonly IMockedCourseController _controller;
     private readonly INavigationService _navigation;
     private readonly IDialogService _dialogs;
+    private readonly IBugInjectionManager _bugManager;
     private int _courseId;
+    private bool _isPageActive;
 
     public CourseDetailViewModel(
         IMockedCourseController controller,
         INavigationService navigation,
-        IDialogService dialogs)
+        IDialogService dialogs,
+        IBugInjectionManager bugManager)
     {
         _controller = controller;
         _navigation = navigation;
         _dialogs = dialogs;
+        _bugManager = bugManager;
     }
 
     [ObservableProperty]
@@ -37,8 +42,16 @@ public partial class CourseDetailViewModel : PageViewModel
         _courseId = courseId;
     }
 
-    protected override Task OnAppearingAsync(CancellationToken cancellationToken) =>
-        LoadAsync();
+    protected override Task OnAppearingAsync(CancellationToken cancellationToken)
+    {
+        _isPageActive = true;
+        return LoadAsync();
+    }
+
+    protected override void OnDisappearing()
+    {
+        _isPageActive = false;
+    }
 
     [RelayCommand]
     private Task LoadAsync() => RunBusyAsync(async cancellationToken =>
@@ -49,9 +62,22 @@ public partial class CourseDetailViewModel : PageViewModel
             return;
         }
 
-        var courseTask = _controller.GetCourseAsync(_courseId, cancellationToken);
-        var basketTask = _controller.IsInBasketAsync(_courseId, cancellationToken);
+        var requestToken = _bugManager.IsEnabled(BugIds.CourseDetailAfterClose)
+            ? CancellationToken.None
+            : cancellationToken;
+        var courseTask = _controller.GetCourseAsync(_courseId, requestToken);
+        var basketTask = _controller.IsInBasketAsync(_courseId, requestToken);
         await Task.WhenAll(courseTask, basketTask);
+
+        if (!_isPageActive
+            && _bugManager.TryTrigger(
+                BugIds.CourseDetailAfterClose,
+                $"CourseId={_courseId}"))
+        {
+            throw new InjectedBugException(
+                BugIds.CourseDetailAfterClose,
+                $"Course {_courseId} completed loading after its page closed.");
+        }
 
         Course = courseTask.Result;
         IsInBasket = basketTask.Result;

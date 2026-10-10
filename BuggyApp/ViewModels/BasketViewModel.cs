@@ -13,6 +13,7 @@ public partial class BasketViewModel : PageViewModel
     private readonly IDialogService _dialogs;
     private readonly IBugInjectionManager _bugManager;
     private int _registrationInProgress;
+    private bool _isPageActive;
 
     public BasketViewModel(
         IMockedCourseController controller,
@@ -37,8 +38,16 @@ public partial class BasketViewModel : PageViewModel
 
     public bool IsEmpty => !HasCourses;
 
-    protected override Task OnAppearingAsync(CancellationToken cancellationToken) =>
-        LoadAsync();
+    protected override Task OnAppearingAsync(CancellationToken cancellationToken)
+    {
+        _isPageActive = true;
+        return LoadAsync();
+    }
+
+    protected override void OnDisappearing()
+    {
+        _isPageActive = false;
+    }
 
     [RelayCommand]
     private Task LoadAsync() => RunBusyAsync(async cancellationToken =>
@@ -147,6 +156,12 @@ public partial class BasketViewModel : PageViewModel
     [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task RegisterAsync()
     {
+        if (_bugManager.IsEnabled(BugIds.BasketRegisterAfterClose))
+        {
+            await RegisterWithLifecycleBugAsync();
+            return;
+        }
+
         if (_bugManager.IsEnabled(BugIds.BasketRegisterReentry))
         {
             await RegisterWithReentryBugAsync();
@@ -178,6 +193,53 @@ public partial class BasketViewModel : PageViewModel
                 "registration-result",
                 new Dictionary<string, object> { ["RegistrationId"] = registration.Id });
         });
+    }
+
+    private async Task RegisterWithLifecycleBugAsync()
+    {
+        if (!HasCourses || IsBusy)
+        {
+            return;
+        }
+
+        var confirmed = await _dialogs.ConfirmAsync(
+            "Confirm registration?",
+            $"Register the {CourseCount} selected courses?",
+            "Register",
+            "Cancel");
+
+        if (!confirmed)
+        {
+            return;
+        }
+
+        IsBusy = true;
+        ErrorMessage = null;
+
+        try
+        {
+            var registration = await _controller.RegisterAsync(CancellationToken.None);
+
+            if (!_isPageActive
+                && _bugManager.TryTrigger(
+                    BugIds.BasketRegisterAfterClose,
+                    $"RegistrationId={registration.Id}"))
+            {
+                throw new InjectedBugException(
+                    BugIds.BasketRegisterAfterClose,
+                    "Registration completed after the Basket page closed.");
+            }
+
+            Courses.Clear();
+            CourseCount = 0;
+            await _navigation.GoToAsync(
+                "registration-result",
+                new Dictionary<string, object> { ["RegistrationId"] = registration.Id });
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     private async Task RegisterWithReentryBugAsync()
