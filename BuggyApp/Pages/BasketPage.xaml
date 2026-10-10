@@ -35,7 +35,7 @@
                                     <Label FontAttributes="Bold" FontSize="18" Text="{Binding Title}" TextColor="{StaticResource OceanText}" />
                                     <Label Text="{Binding Instructor}" TextColor="{StaticResource OceanTextMuted}" />
                                 </VerticalStackLayout>
-                                <Button Grid.Column="1" BackgroundColor="{StaticResource OceanDanger}" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BasketViewModel}}, Path=RemoveCommand}" CommandParameter="{Binding .}" IsEnabled="{Binding IsUpdating, Converter={StaticResource InvertedBoolConverter}}" Text="Remove" VerticalOptions="Center" />
+                                <Button Grid.Column="1" BackgroundColor="{StaticResource OceanDanger}" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BasketViewModel}}, Path=RemoveCommand}" CommandParameter="{Binding .}" Text="Remove" VerticalOptions="Center" />
                                 <Button Grid.Row="1" Grid.ColumnSpan="2" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BasketViewModel}}, Path=OpenDetailsCommand}" CommandParameter="{Binding .}" Text="View course details" />
                             </Grid>
                         </Border>

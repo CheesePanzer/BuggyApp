@@ -51,6 +51,12 @@ public partial class BasketViewModel : PageViewModel
     [RelayCommand]
     private async Task RemoveAsync(CourseItemViewModel course)
     {
+        if (_bugManager.IsEnabled(BugIds.BasketRemoveClearRace))
+        {
+            await RemoveWithCollectionRaceAsync(course);
+            return;
+        }
+
         if (course.IsUpdating)
         {
             return;
@@ -78,10 +84,35 @@ public partial class BasketViewModel : PageViewModel
         }
     }
 
-    [RelayCommand]
+    private async Task RemoveWithCollectionRaceAsync(CourseItemViewModel course)
+    {
+        var staleIndex = Courses.IndexOf(course);
+        if (staleIndex < 0)
+        {
+            return;
+        }
+
+        await _controller.RemoveFromBasketAsync(course.Id, PageCancellationToken);
+
+        if (staleIndex >= Courses.Count || Courses[staleIndex] != course)
+        {
+            if (!_bugManager.TryTrigger(
+                BugIds.BasketRemoveClearRace,
+                $"CourseId={course.Id}, StaleIndex={staleIndex}, CurrentCount={Courses.Count}"))
+            {
+                return;
+            }
+        }
+
+        // The stale index is intentionally used in Natural mode.
+        Courses.RemoveAt(staleIndex);
+        CourseCount = Courses.Count;
+    }
+
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task ClearAsync()
     {
-        if (!HasCourses || IsBusy)
+        if (!HasCourses || (IsBusy && !_bugManager.IsEnabled(BugIds.BasketRemoveClearRace)))
         {
             return;
         }
@@ -94,6 +125,14 @@ public partial class BasketViewModel : PageViewModel
 
         if (!confirmed)
         {
+            return;
+        }
+
+        if (_bugManager.IsEnabled(BugIds.BasketRemoveClearRace))
+        {
+            await _controller.ClearBasketAsync(PageCancellationToken);
+            Courses.Clear();
+            CourseCount = 0;
             return;
         }
 

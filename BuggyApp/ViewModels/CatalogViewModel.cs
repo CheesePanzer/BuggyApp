@@ -14,6 +14,7 @@ public partial class CatalogViewModel : PageViewModel
     private readonly INavigationService _navigation;
     private readonly IBugInjectionManager _bugManager;
     private readonly ConcurrentDictionary<int, byte> _activeBasketOperations = new();
+    private readonly Dictionary<int, CourseItemViewModel> _courseIndex = [];
     private int _currentPage;
     private bool _hasMore;
     private bool _isLoadingMore;
@@ -86,9 +87,15 @@ public partial class CatalogViewModel : PageViewModel
         ReplaceCourses(coursesTask.Result, basketTask.Result);
     });
 
-    [RelayCommand]
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task LoadMoreAsync()
     {
+        if (_bugManager.IsEnabled(BugIds.CatalogPagingRefreshRace))
+        {
+            await LoadMoreWithCollectionRaceAsync();
+            return;
+        }
+
         if (IsBusy || _isLoadingMore || !_hasMore)
         {
             return;
@@ -123,6 +130,26 @@ public partial class CatalogViewModel : PageViewModel
             _isLoadingMore = false;
             IsLoadingMore = false;
         }
+    }
+
+    private async Task LoadMoreWithCollectionRaceAsync()
+    {
+        if (!_hasMore)
+        {
+            return;
+        }
+
+        var nextPage = _currentPage + 1;
+        var category = SelectedCategory == "All" ? null : SelectedCategory;
+        var coursesTask = _controller.GetCoursesAsync(
+            category,
+            nextPage,
+            PageCancellationToken);
+        var basketTask = _controller.GetBasketAsync(PageCancellationToken);
+
+        await Task.WhenAll(coursesTask, basketTask);
+        AppendCoursesWithRaceDetection(coursesTask.Result, basketTask.Result, nextPage, category);
+        _currentPage = nextPage;
     }
 
     [RelayCommand(AllowConcurrentExecutions = true)]
@@ -211,6 +238,7 @@ public partial class CatalogViewModel : PageViewModel
         IReadOnlyList<Course> basket)
     {
         Courses.Clear();
+        _courseIndex.Clear();
         AppendCourses(result, basket);
     }
 
@@ -221,7 +249,37 @@ public partial class CatalogViewModel : PageViewModel
         var basketIds = basket.Select(course => course.Id).ToHashSet();
         foreach (var course in result.Items)
         {
-            Courses.Add(new CourseItemViewModel(course, basketIds.Contains(course.Id)));
+            var item = new CourseItemViewModel(course, basketIds.Contains(course.Id));
+            Courses.Add(item);
+            _courseIndex[course.Id] = item;
+        }
+
+        _hasMore = result.HasMore;
+    }
+
+    private void AppendCoursesWithRaceDetection(
+        PagedResult<Course> result,
+        IReadOnlyList<Course> basket,
+        int requestedPage,
+        string? requestedCategory)
+    {
+        var basketIds = basket.Select(course => course.Id).ToHashSet();
+        foreach (var course in result.Items)
+        {
+            var item = new CourseItemViewModel(course, basketIds.Contains(course.Id));
+            if (_courseIndex.ContainsKey(course.Id))
+            {
+                if (!_bugManager.TryTrigger(
+                    BugIds.CatalogPagingRefreshRace,
+                    $"CourseId={course.Id}, Page={requestedPage}, Category={requestedCategory ?? "All"}"))
+                {
+                    continue;
+                }
+            }
+
+            // Dictionary.Add intentionally exposes a duplicate-key race in Natural mode.
+            _courseIndex.Add(course.Id, item);
+            Courses.Add(item);
         }
 
         _hasMore = result.HasMore;

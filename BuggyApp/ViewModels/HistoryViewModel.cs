@@ -96,6 +96,12 @@ public partial class HistoryViewModel : PageViewModel
     [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task DeleteAsync(RegistrationItemViewModel registration)
     {
+        if (_bugManager.IsEnabled(BugIds.HistoryDeleteClearRace))
+        {
+            await DeleteWithCollectionRaceAsync(registration);
+            return;
+        }
+
         if (_bugManager.IsEnabled(BugIds.HistoryDeleteReentry))
         {
             await DeleteWithReentryBugAsync(registration);
@@ -119,6 +125,44 @@ public partial class HistoryViewModel : PageViewModel
             Registrations.Remove(registration);
             RegistrationCount = Registrations.Count;
         });
+    }
+
+    private async Task DeleteWithCollectionRaceAsync(RegistrationItemViewModel registration)
+    {
+        var confirmed = await _dialogs.ConfirmAsync(
+            "Delete registration?",
+            $"Delete registration {registration.ShortId}?",
+            "Delete",
+            "Cancel");
+
+        if (!confirmed)
+        {
+            return;
+        }
+
+        var staleIndex = Registrations.IndexOf(registration);
+        if (staleIndex < 0)
+        {
+            return;
+        }
+
+        await _controller.DeleteRegistrationAsync(
+            registration.Id,
+            PageCancellationToken);
+
+        if (staleIndex >= Registrations.Count || Registrations[staleIndex] != registration)
+        {
+            if (!_bugManager.TryTrigger(
+                BugIds.HistoryDeleteClearRace,
+                $"RegistrationId={registration.Id}, StaleIndex={staleIndex}, CurrentCount={Registrations.Count}"))
+            {
+                return;
+            }
+        }
+
+        // The stale index is intentionally used in Natural mode.
+        Registrations.RemoveAt(staleIndex);
+        RegistrationCount = Registrations.Count;
     }
 
     private async Task DeleteWithReentryBugAsync(RegistrationItemViewModel registration)
@@ -162,10 +206,10 @@ public partial class HistoryViewModel : PageViewModel
         }
     }
 
-    [RelayCommand]
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task ClearAsync()
     {
-        if (!HasRegistrations || IsBusy)
+        if (!HasRegistrations || (IsBusy && !_bugManager.IsEnabled(BugIds.HistoryDeleteClearRace)))
         {
             return;
         }
@@ -178,6 +222,15 @@ public partial class HistoryViewModel : PageViewModel
 
         if (!confirmed)
         {
+            return;
+        }
+
+        if (_bugManager.IsEnabled(BugIds.HistoryDeleteClearRace))
+        {
+            await _controller.ClearHistoryAsync(PageCancellationToken);
+            Registrations.Clear();
+            RegistrationCount = 0;
+            _hasMore = false;
             return;
         }
 
