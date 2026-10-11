@@ -26,6 +26,8 @@ public interface IBugInjectionManager
 
     bool TryTrigger(string bugId, string? detail = null);
 
+    void TriggerUiThreadBlock(string bugId, string? detail = null);
+
     void RecordTriggered(string bugId, string? detail = null);
 
     IReadOnlyList<BugTriggerRecord> GetTriggeredSnapshot();

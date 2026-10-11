@@ -124,6 +124,18 @@ public sealed class BugInjectionManager : IBugInjectionManager
         };
     }
 
+    public void TriggerUiThreadBlock(string bugId, string? detail = null)
+    {
+        if (!TryTrigger(bugId, detail))
+        {
+            return;
+        }
+
+        // This intentionally blocks the caller. ViewModels call it before their first await,
+        // so Android observes an unresponsive UI thread in Natural mode.
+        Thread.Sleep(_options.UiThreadBlockMilliseconds);
+    }
+
     public void RecordTriggered(string bugId, string? detail = null)
     {
         var definition = GetDefinition(bugId);

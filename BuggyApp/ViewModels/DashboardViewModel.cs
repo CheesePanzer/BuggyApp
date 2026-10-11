@@ -1,3 +1,4 @@
+using BuggyApp.BugInjection;
 using BuggyApp.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -8,14 +9,17 @@ public partial class DashboardViewModel : PageViewModel
 {
     private readonly IMockedCourseController _controller;
     private readonly INavigationService _navigation;
+    private readonly IBugInjectionManager _bugManager;
     private int _titleTapCount;
 
     public DashboardViewModel(
         IMockedCourseController controller,
-        INavigationService navigation)
+        INavigationService navigation,
+        IBugInjectionManager bugManager)
     {
         _controller = controller;
         _navigation = navigation;
+        _bugManager = bugManager;
     }
 
     [ObservableProperty]
@@ -28,10 +32,19 @@ public partial class DashboardViewModel : PageViewModel
     public partial int RegistrationCount { get; set; }
 
     protected override Task OnAppearingAsync(CancellationToken cancellationToken) =>
-        LoadAsync();
+        LoadCoreAsync();
 
     [RelayCommand]
-    private Task LoadAsync() => RunBusyAsync(async cancellationToken =>
+    private Task LoadAsync()
+    {
+        _bugManager.TriggerUiThreadBlock(
+            BugIds.DashboardRefreshAnr,
+            "Operation=DashboardRefresh");
+
+        return LoadCoreAsync();
+    }
+
+    private Task LoadCoreAsync() => RunBusyAsync(async cancellationToken =>
     {
         var summary = await _controller.GetDashboardAsync(cancellationToken);
         CourseCount = summary.CourseCount;

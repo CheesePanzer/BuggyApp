@@ -156,6 +156,12 @@ public partial class BasketViewModel : PageViewModel
     [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task RegisterAsync()
     {
+        if (_bugManager.IsEnabled(BugIds.BasketRegisterAnr))
+        {
+            await RegisterWithAnrBugAsync();
+            return;
+        }
+
         if (_bugManager.IsEnabled(BugIds.BasketRegisterAfterClose))
         {
             await RegisterWithLifecycleBugAsync();
@@ -183,6 +189,39 @@ public partial class BasketViewModel : PageViewModel
         {
             return;
         }
+
+        await RunBusyAsync(async cancellationToken =>
+        {
+            var registration = await _controller.RegisterAsync(cancellationToken);
+            Courses.Clear();
+            CourseCount = 0;
+            await _navigation.GoToAsync(
+                "registration-result",
+                new Dictionary<string, object> { ["RegistrationId"] = registration.Id });
+        });
+    }
+
+    private async Task RegisterWithAnrBugAsync()
+    {
+        if (!HasCourses || IsBusy)
+        {
+            return;
+        }
+
+        var confirmed = await _dialogs.ConfirmAsync(
+            "Confirm registration?",
+            $"Register the {CourseCount} selected courses?",
+            "Register",
+            "Cancel");
+
+        if (!confirmed)
+        {
+            return;
+        }
+
+        _bugManager.TriggerUiThreadBlock(
+            BugIds.BasketRegisterAnr,
+            $"BasketCourseCount={CourseCount}");
 
         await RunBusyAsync(async cancellationToken =>
         {

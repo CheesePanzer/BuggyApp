@@ -49,13 +49,13 @@ public partial class CatalogViewModel : PageViewModel
     public partial bool IsLoadingMore { get; set; }
 
     protected override Task OnAppearingAsync(CancellationToken cancellationToken) =>
-        RefreshAsync();
+        RefreshCoreAsync();
 
     partial void OnSelectedCategoryChanged(string value)
     {
         if (!IsBusy)
         {
-            _ = RefreshAsync();
+            _ = RefreshCoreAsync();
         }
     }
 
@@ -72,7 +72,16 @@ public partial class CatalogViewModel : PageViewModel
     }
 
     [RelayCommand]
-    private Task RefreshAsync() => RunBusyAsync(async cancellationToken =>
+    private Task RefreshAsync()
+    {
+        _bugManager.TriggerUiThreadBlock(
+            BugIds.CatalogRefreshAnr,
+            $"Category={SelectedCategory}");
+
+        return RefreshCoreAsync();
+    }
+
+    private Task RefreshCoreAsync() => RunBusyAsync(async cancellationToken =>
     {
         IsRefreshing = true;
         _currentPage = 1;
